@@ -44,7 +44,7 @@
 
 .sidebarItem {
   width: 250px;
-  height: 150px;
+  height: 170px;
 }
 
 .sidebarItem:not(:last-child) {
@@ -58,6 +58,5 @@
 }
 
 .sidebarImg {
-  width: 100%;
-  height: auto;
+  display: block;
 }
