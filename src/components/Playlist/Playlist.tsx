@@ -1,11 +1,22 @@
+
 import Track from '@/components/Track/Track';
+import { data } from '../../../data';
 import styles from './Playlist.module.css';
+
+function formatDuration(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+}
 
 export default function Playlist() {
   return (
     <div className={styles.centerblockContent}>
       <div className={styles.contentTitle}>
-        <div className={`${styles.playlistTitleCol} ${styles.col01}`}>Трек</div>
+        <div className={`${styles.playlistTitleCol} ${styles.col01}`}>
+          Трек
+        </div>
 
         <div className={`${styles.playlistTitleCol} ${styles.col02}`}>
           Исполнитель
@@ -23,42 +34,15 @@ export default function Playlist() {
       </div>
 
       <div className={styles.contentPlaylist}>
-        <Track
-          title="Guilt"
-          author="Nero"
-          album="Welcome Reality"
-          time="4:44"
-        />
-
-        <Track
-          title="Elektro"
-          author="Dynoro, Outwork, Mr. Gee"
-          album="Elektro"
-          time="2:22"
-        />
-
-        <Track
-          title="I’m Fire"
-          author="Ali Bakgor"
-          album="I’m Fire"
-          time="2:22"
-        />
-
-        <Track
-          title="Non Stop"
-          titleSpan="(Remix)"
-          author="Стоункат, Psychopath"
-          album="Non Stop"
-          time="4:12"
-        />
-
-        <Track
-          title="Run Run"
-          titleSpan="(feat. AR/CO)"
-          author="Jaded, Will Clarke, AR/CO"
-          album="Run Run"
-          time="2:54"
-        />
+        {data.map((track) => (
+          <Track
+            key={track._id}
+            title={track.name}
+            author={track.author}
+            album={track.album}
+            time={formatDuration(track.duration_in_seconds)}
+          />
+        ))}
       </div>
     </div>
   );
