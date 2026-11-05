@@ -1,7 +1,10 @@
+
 .centerblockFilter {
   display: flex;
   flex-direction: row;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 51px;
 }
 
@@ -10,10 +13,17 @@
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
-  margin-right: 15px;
+  margin-right: 5px;
+}
+
+.filterWrapper {
+  position: relative;
 }
 
 .filterButton {
+  color: #ffffff;
+  background: transparent;
+  font-family: inherit;
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
@@ -21,8 +31,58 @@
   border: 1px solid #ffffff;
   border-radius: 60px;
   padding: 6px 20px;
+  cursor: pointer;
 }
 
-.filterButton:not(:last-child) {
-  margin-right: 10px;
+.filterButton:hover,
+.active {
+  color: #b672ff;
+  border-color: #b672ff;
+}
+
+.filterList {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: max-content;
+  max-width: 248px;
+  max-height: 237px;
+  overflow-y: auto;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #313131;
+  color: #ffffff;
+}
+
+.filterList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filterList::-webkit-scrollbar-track {
+  background-color: rgba(75, 73, 73, 1);
+}
+
+.filterList::-webkit-scrollbar-thumb {
+  background-color: #ffffff;
+}
+
+.filterItem {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filterItem:hover {
+  color: #b672ff;
 }
