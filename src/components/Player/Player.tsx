@@ -1,9 +1,60 @@
-import Link from 'next/link';
-import styles from './Player.module.css';
+'use client';
 
-export default function Player() {
+import { useEffect, useRef } from 'react';
+import styles from './Player.module.css';
+import { data } from '../../../data';
+
+type TrackData = (typeof data)[number];
+
+type PlayerProps = {
+  currentTrack: TrackData | null;
+  isPlaying: boolean;
+  onPlayingChange: (playing: boolean) => void;
+};
+
+export default function Player({
+  currentTrack,
+  isPlaying,
+  onPlayingChange,
+}: PlayerProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (!audio || !currentTrack) return;
+
+    audio.src = currentTrack.track_file;
+    audio.load();
+
+    audio.play().catch(() => {
+      onPlayingChange(false);
+    });
+  }, [currentTrack, onPlayingChange]);
+
+  const togglePlay = () => {
+    const audio = audioRef.current;
+
+    if (!audio || !currentTrack) return;
+
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play().catch(() => {
+        onPlayingChange(false);
+      });
+    }
+  };
+
   return (
     <div className={styles.bar}>
+      <audio
+        ref={audioRef}
+        onPlay={() => onPlayingChange(true)}
+        onPause={() => onPlayingChange(false)}
+        onEnded={() => onPlayingChange(false)}
+      />
+
       <div className={styles.barContent}>
         <div className={styles.barPlayerProgress}></div>
 
@@ -16,11 +67,21 @@ export default function Player() {
                 </svg>
               </div>
 
-              <div className={`${styles.playerBtnPlay} ${styles.btn}`}>
+              <button
+                type="button"
+                className={`${styles.playerBtnPlay} ${styles.btn}`}
+                onClick={togglePlay}
+                disabled={!currentTrack}
+                aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
+              >
                 <svg className={styles.playerBtnPlaySvg}>
-                  <use xlinkHref="/img/icon/sprite.svg#icon-play"></use>
+                  <use
+                    xlinkHref={`/img/icon/sprite.svg#${
+                      isPlaying ? 'icon-pause' : 'icon-play'
+                    }`}
+                  ></use>
                 </svg>
-              </div>
+              </button>
 
               <div className={styles.playerBtnNext}>
                 <svg className={styles.playerBtnNextSvg}>
@@ -50,15 +111,15 @@ export default function Player() {
                 </div>
 
                 <div className={styles.trackPlayAuthor}>
-                  <Link className={styles.trackPlayAuthorLink} href="#">
-                    Ты та...
-                  </Link>
+                  <span className={styles.trackPlayAuthorLink}>
+                    {currentTrack?.name ?? 'Выберите трек'}
+                  </span>
                 </div>
 
                 <div className={styles.trackPlayAlbum}>
-                  <Link className={styles.trackPlayAlbumLink} href="#">
-                    Баста
-                  </Link>
+                  <span className={styles.trackPlayAlbumLink}>
+                    {currentTrack?.author ?? 'Исполнитель'}
+                  </span>
                 </div>
               </div>
 
@@ -91,6 +152,15 @@ export default function Player() {
                   className={`${styles.volumeProgressLine} ${styles.btn}`}
                   type="range"
                   name="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  defaultValue="0.5"
+                  onChange={(event) => {
+                    if (audioRef.current) {
+                      audioRef.current.volume = Number(event.target.value);
+                    }
+                  }}
                 />
               </div>
             </div>
