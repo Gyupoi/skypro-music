@@ -23,6 +23,8 @@
   overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: 78px;
+  box-sizing: border-box;
 }
 
 .playlistTitleCol {

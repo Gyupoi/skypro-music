@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import styles from './Track.module.css';
 
@@ -7,6 +9,9 @@ type TrackProps = {
   author: string;
   album: string;
   time: string;
+  isActive: boolean;
+  isPlaying: boolean;
+  onSelect: () => void;
 };
 
 export default function Track({
@@ -15,19 +20,47 @@ export default function Track({
   author,
   album,
   time,
+  isActive,
+  isPlaying,
+  onSelect,
 }: TrackProps) {
   return (
-    <div className={styles.playlistItem}>
+    <div
+      className={`${styles.playlistItem} ${
+        isActive ? styles.playlistItemActive : ''
+      }`}
+      onClick={onSelect}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
+    >
       <div className={styles.playlistTrack}>
         <div className={styles.trackTitle}>
           <div className={styles.trackTitleImage}>
-            <svg className={styles.trackTitleSvg}>
-              <use xlinkHref="/img/icon/sprite.svg#icon-note"></use>
-            </svg>
+            {isActive ? (
+              <span
+                className={`${styles.playingDot} ${
+                  isPlaying ? styles.playingDotAnimated : ''
+                }`}
+              />
+            ) : (
+              <svg className={styles.trackTitleSvg}>
+                <use xlinkHref="/img/icon/sprite.svg#icon-note"></use>
+              </svg>
+            )}
           </div>
 
           <div>
-            <Link className={styles.trackTitleLink} href="#">
+            <Link
+              className={styles.trackTitleLink}
+              href="#"
+              onClick={(event) => event.preventDefault()}
+            >
               {title}
               {titleSpan && (
                 <span className={styles.trackTitleSpan}>{titleSpan}</span>
@@ -37,13 +70,21 @@ export default function Track({
         </div>
 
         <div className={styles.trackAuthor}>
-          <Link className={styles.trackAuthorLink} href="#">
+          <Link
+            className={styles.trackAuthorLink}
+            href="#"
+            onClick={(event) => event.preventDefault()}
+          >
             {author}
           </Link>
         </div>
 
         <div className={styles.trackAlbum}>
-          <Link className={styles.trackAlbumLink} href="#">
+          <Link
+            className={styles.trackAlbumLink}
+            href="#"
+            onClick={(event) => event.preventDefault()}
+          >
             {album}
           </Link>
         </div>
