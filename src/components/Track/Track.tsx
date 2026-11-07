@@ -42,8 +42,12 @@ export default function Track({
       <div className={styles.playlistTrack}>
         <div className={styles.trackTitle}>
           <div className={styles.trackTitleImage}>
-            {isActive && isPlaying ? (
-              <span className={styles.playingIndicator}>Ⅱ</span>
+            {isActive ? (
+              <span
+                className={`${styles.playingDot} ${
+                  isPlaying ? styles.playingDotAnimated : ''
+                }`}
+              />
             ) : (
               <svg className={styles.trackTitleSvg}>
                 <use xlinkHref="/img/icon/sprite.svg#icon-note"></use>
