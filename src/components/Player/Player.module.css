@@ -277,3 +277,18 @@
   fill: transparent;
   stroke: #ffffff;
 }
+
+.playerBtnPlay {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  appearance: none;
+}
+
+.playerBtnPlay:hover,
+.playerBtnPlay:active,
+.playerBtnPlay:focus {
+  background: transparent;
+  box-shadow: none;
+}
