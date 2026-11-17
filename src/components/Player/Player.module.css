@@ -6,6 +6,7 @@
   background: #1c1c1c;
   z-index: 10;
 }
+
 .barContent {
   display: flex;
   flex-direction: column;
@@ -13,8 +14,69 @@
 
 .barPlayerProgress {
   width: 100%;
-  height: 5px;
-  background: #2e2e2e;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.currentTime,
+.duration {
+  min-width: 35px;
+  color: #b3b3b3;
+  font-size: 11px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.duration {
+  text-align: right;
+}
+
+.progressLine {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  appearance: none;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+}
+
+.progressLine::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 5px;
+}
+
+.progressLine::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -3px;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+.progressLine::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 5px;
+}
+
+.progressLine::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border: none;
+  border-radius: 50%;
+}
+
+.progressLine:disabled {
+  cursor: default;
 }
 
 .barPlayerBlock {
@@ -75,7 +137,6 @@
 
 .playerBtnNext {
   margin-right: 28px;
-  fill: #a53939;
 }
 
 .playerBtnNextSvg {
@@ -87,6 +148,9 @@
 
 .playerBtnRepeat {
   margin-right: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .playerBtnRepeatSvg {
@@ -97,8 +161,9 @@
 }
 
 .playerBtnShuffle {
-  display: flex;
-  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .playerBtnShuffleSvg {
@@ -108,9 +173,10 @@
   stroke: #696969;
 }
 
-.playerTrackPlay {
+.trackPlay {
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .trackPlayContain {
@@ -174,16 +240,15 @@
   color: #ffffff;
 }
 
-.trackPlayLikeDis {
+.trackPlayLike {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  margin-left: 26%;
-}
-
-.trackPlayLike,
-.trackPlayDislike {
+  justify-content: center;
   padding: 5px;
+  margin-left: 26px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .trackPlayLikeSvg {
@@ -193,15 +258,9 @@
   stroke: #696969;
 }
 
-.trackPlayDislike {
-  margin-left: 28.5px;
-}
-
-.trackPlayDislikeSvg {
-  width: 14.34px;
-  height: 13px;
-  fill: transparent;
-  stroke: #696969;
+.favoriteActive {
+  fill: #b672ff;
+  stroke: #b672ff;
 }
 
 .volumeContent {
@@ -272,13 +331,13 @@
   cursor: pointer;
 }
 
-.btnIcon:active .trackPlayLikeSvg,
-.btnIcon:active .trackPlayDislikeSvg {
-  fill: transparent;
-  stroke: #ffffff;
+.activeMode svg {
+  stroke: #b672ff;
 }
 
-.playerBtnPlay {
+.playerBtnPrev,
+.playerBtnPlay,
+.playerBtnNext {
   background: transparent;
   border: none;
   outline: none;
@@ -286,9 +345,31 @@
   appearance: none;
 }
 
+.playerBtnPrev:focus,
+.playerBtnPlay:focus,
+.playerBtnNext:focus,
+.playerBtnRepeat:focus,
+.playerBtnShuffle:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .playerBtnPlay:hover,
 .playerBtnPlay:active,
 .playerBtnPlay:focus {
   background: transparent;
   box-shadow: none;
+}
+
+.trackPlayLike:hover .trackPlayLikeSvg {
+  stroke: #acacac;
+}
+
+.trackPlayLike:active .trackPlayLikeSvg {
+  stroke: #ffffff;
+}
+
+.trackPlayLike:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
