@@ -1,15 +1,18 @@
+
 'use client';
 
 import { useState } from 'react';
 import classNames from 'classnames';
-import { data } from '../../../data';
+import type { Track } from '@/api/api';
 import styles from './Filters.module.css';
 
 type FilterName = 'author' | 'year' | 'genre';
 
-const tracks = data;
+type FiltersProps = {
+  tracks: Track[];
+};
 
-export default function Filters() {
+export default function Filters({ tracks }: FiltersProps) {
   const [activeFilter, setActiveFilter] = useState<FilterName | null>(null);
 
   const authors = [...new Set(tracks.map((track) => track.author))].sort();
@@ -74,8 +77,7 @@ export default function Filters() {
                   className={styles.filterItem}
                   key={item}
                   onClick={() => {
-                    // По заданию пока только открываем список.
-                    // Фильтрацию добавим в следующей работе.
+                    // Фильтрацию пока не реализуем.
                   }}
                 >
                   {item}
