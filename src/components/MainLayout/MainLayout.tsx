@@ -9,6 +9,8 @@ import {
   type ReactNode,
 } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import Navigation from '@/components/Navigation/Navigation';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Player from '@/components/Player/Player';
@@ -61,8 +63,7 @@ type MainLayoutProps = {
 };
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const router = useRouter();
 
   const [queue, setQueueState] = useState<Track[]>([]);
   const [playbackOrder, setPlaybackOrder] = useState<Track[]>([]);
@@ -77,26 +78,32 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, []);
 
   useEffect(() => {
-    async function checkAuth() {
-      const accessToken = localStorage.getItem('access');
+    const accessToken = localStorage.getItem('access');
 
-      if (!accessToken) {
-        window.location.replace('/auth/signin');
-        return;
-      }
+    if (!accessToken) {
+      setFavoriteTracks([]);
+      return;
+    }
 
+    let isMounted = true;
+
+    async function loadFavorites() {
       try {
         const favorites = await getFavoriteTracks();
-        setFavoriteTracks(favorites);
+
+        if (isMounted) {
+          setFavoriteTracks(favorites);
+        }
       } catch (error) {
         console.error('Не удалось загрузить избранное:', error);
-      } finally {
-        setIsAuthorized(true);
-        setIsCheckingAuth(false);
       }
     }
 
-    checkAuth();
+    void loadFavorites();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const setQueue = useCallback((tracks: Track[]) => {
@@ -107,6 +114,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   const toggleFavorite = useCallback(
     async (track: Track) => {
+      const accessToken = localStorage.getItem('access');
+
+      if (!accessToken) {
+        router.push('/auth/signin');
+        return;
+      }
+
       const isFavorite = favoriteTracks.some(
         (favoriteTrack) => favoriteTrack._id === track._id,
       );
@@ -123,7 +137,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setFavoriteTracks((previous) => [...previous, track]);
       }
     },
-    [favoriteTracks],
+    [favoriteTracks, router],
   );
 
   const handleNextTrack = useCallback(() => {
@@ -168,10 +182,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
     setPlaybackOrder(currentTrack ? [currentTrack, ...shuffled] : shuffled);
     setIsShuffle(true);
   }, [isShuffle, queue, currentTrack]);
-
-  if (isCheckingAuth || !isAuthorized) {
-    return <p>Проверка авторизации...</p>;
-  }
 
   const currentTrackIsFavorite = currentTrack
     ? favoriteTracks.some((track) => track._id === currentTrack._id)
