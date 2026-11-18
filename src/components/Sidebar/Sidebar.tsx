@@ -42,6 +42,7 @@ export default function Sidebar() {
                 alt="Плейлист дня"
                 width={250}
                 height={170}
+                priority
               />
             </Link>
           </div>
