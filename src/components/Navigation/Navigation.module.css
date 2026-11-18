@@ -60,3 +60,20 @@
   font-size: 16px;
   line-height: 24px;
 }
+
+.menuList button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+}
+
+.menuList button:focus,
+.menuList button:active {
+  outline: none;
+  box-shadow: none;
+}

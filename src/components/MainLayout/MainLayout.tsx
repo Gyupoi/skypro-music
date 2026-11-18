@@ -9,10 +9,18 @@ import {
   type ReactNode,
 } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import Navigation from '@/components/Navigation/Navigation';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Player from '@/components/Player/Player';
-import type { Track } from '@/api/api';
+
+import {
+  getFavoriteTracks,
+  addTrackToFavorite,
+  removeTrackFromFavorite,
+  type Track,
+} from '@/api/api';
 
 import '../../app/page.css';
 
@@ -20,8 +28,11 @@ type MusicPlayerContextType = {
   currentTrack: Track | null;
   isPlaying: boolean;
   isShuffle: boolean;
+  favoriteTracks: Track[];
   setQueue: (tracks: Track[]) => void;
   onTrackSelect: (track: Track) => void;
+  toggleFavorite: (track: Track) => Promise<void>;
+  clearFavorites: () => void;
 };
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | null>(null);
@@ -52,8 +63,7 @@ type MainLayoutProps = {
 };
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const router = useRouter();
 
   const [queue, setQueueState] = useState<Track[]>([]);
   const [playbackOrder, setPlaybackOrder] = useState<Track[]>([]);
@@ -61,16 +71,39 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
 
+  const [favoriteTracks, setFavoriteTracks] = useState<Track[]>([]);
+
+  const clearFavorites = useCallback(() => {
+    setFavoriteTracks([]);
+  }, []);
+
   useEffect(() => {
     const accessToken = localStorage.getItem('access');
 
     if (!accessToken) {
-      window.location.replace('/auth/signin');
+      setFavoriteTracks([]);
       return;
     }
 
-    setIsAuthorized(true);
-    setIsCheckingAuth(false);
+    let isMounted = true;
+
+    async function loadFavorites() {
+      try {
+        const favorites = await getFavoriteTracks();
+
+        if (isMounted) {
+          setFavoriteTracks(favorites);
+        }
+      } catch (error) {
+        console.error('Не удалось загрузить избранное:', error);
+      }
+    }
+
+    void loadFavorites();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const setQueue = useCallback((tracks: Track[]) => {
@@ -78,6 +111,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
     setPlaybackOrder(tracks);
     setIsShuffle(false);
   }, []);
+
+  const toggleFavorite = useCallback(
+    async (track: Track) => {
+      const accessToken = localStorage.getItem('access');
+
+      if (!accessToken) {
+        router.push('/auth/signin');
+        return;
+      }
+
+      const isFavorite = favoriteTracks.some(
+        (favoriteTrack) => favoriteTrack._id === track._id,
+      );
+
+      if (isFavorite) {
+        await removeTrackFromFavorite(track._id);
+
+        setFavoriteTracks((previous) =>
+          previous.filter((item) => item._id !== track._id),
+        );
+      } else {
+        await addTrackToFavorite(track._id);
+
+        setFavoriteTracks((previous) => [...previous, track]);
+      }
+    },
+    [favoriteTracks, router],
+  );
 
   const handleNextTrack = useCallback(() => {
     if (!currentTrack) return;
@@ -122,9 +183,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
     setIsShuffle(true);
   }, [isShuffle, queue, currentTrack]);
 
-  if (isCheckingAuth || !isAuthorized) {
-    return <p>Проверка авторизации...</p>;
-  }
+  const currentTrackIsFavorite = currentTrack
+    ? favoriteTracks.some((track) => track._id === currentTrack._id)
+    : false;
 
   return (
     <MusicPlayerContext.Provider
@@ -132,8 +193,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
         currentTrack,
         isPlaying,
         isShuffle,
+        favoriteTracks,
         setQueue,
         onTrackSelect: setCurrentTrack,
+        toggleFavorite,
+        clearFavorites,
       }}
     >
       <div className="wrapper">
@@ -154,6 +218,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
             onPrevTrack={handlePrevTrack}
             isShuffle={isShuffle}
             onShuffleChange={handleShuffle}
+            isFavorite={currentTrackIsFavorite}
+            onToggleFavorite={() => {
+              if (currentTrack) {
+                void toggleFavorite(currentTrack);
+              }
+            }}
           />
 
           <footer className="footer"></footer>

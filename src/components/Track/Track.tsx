@@ -11,7 +11,9 @@ type TrackProps = {
   time: string;
   isActive: boolean;
   isPlaying: boolean;
+  isFavorite: boolean;
   onSelect: () => void;
+  onToggleFavorite: () => void;
 };
 
 export default function Track({
@@ -22,7 +24,9 @@ export default function Track({
   time,
   isActive,
   isPlaying,
+  isFavorite,
   onSelect,
+  onToggleFavorite,
 }: TrackProps) {
   return (
     <div
@@ -90,9 +94,33 @@ export default function Track({
         </div>
 
         <div className={styles.trackTime}>
-          <svg className={styles.trackTimeSvg}>
-            <use xlinkHref="/img/icon/sprite.svg#icon-like"></use>
-          </svg>
+          <button
+            type="button"
+            aria-label={
+              isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'
+            }
+            aria-pressed={isFavorite}
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggleFavorite();
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+            }}
+          >
+            <svg
+              className={styles.trackTimeSvg}
+              style={{
+                fill: isFavorite ? '#b672ff' : 'none',
+                stroke: isFavorite ? '#b672ff' : 'currentColor',
+              }}
+            >
+              <use xlinkHref="/img/icon/sprite.svg#icon-like"></use>
+            </svg>
+          </button>
 
           <span className={styles.trackTimeText}>{time}</span>
         </div>

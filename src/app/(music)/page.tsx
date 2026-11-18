@@ -10,11 +10,19 @@ import { useMusicPlayer } from '@/components/MainLayout/MainLayout';
 import { getTracks, type Track } from '@/api/api';
 
 function HomeContent() {
-  const { currentTrack, isPlaying, setQueue, onTrackSelect } = useMusicPlayer();
+  const {
+    currentTrack,
+    isPlaying,
+    setQueue,
+    onTrackSelect,
+    favoriteTracks,
+    toggleFavorite,
+  } = useMusicPlayer();
 
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [favoriteError, setFavoriteError] = useState('');
 
   useEffect(() => {
     async function loadTracks() {
@@ -38,6 +46,19 @@ function HomeContent() {
     loadTracks();
   }, [setQueue]);
 
+  async function handleToggleFavorite(track: Track) {
+    try {
+      setFavoriteError('');
+      await toggleFavorite(track);
+    } catch (error) {
+      setFavoriteError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось изменить избранное',
+      );
+    }
+  }
+
   return (
     <>
       <Search />
@@ -50,6 +71,8 @@ function HomeContent() {
 
       {error && <p role="alert">{error}</p>}
 
+      {favoriteError && <p role="alert">{favoriteError}</p>}
+
       {!isLoading && !error && tracks.length === 0 && <p>Треки не найдены</p>}
 
       {!isLoading && !error && tracks.length > 0 && (
@@ -58,6 +81,8 @@ function HomeContent() {
           currentTrackId={currentTrack?._id ?? null}
           isPlaying={isPlaying}
           onTrackSelect={onTrackSelect}
+          favoriteTracks={favoriteTracks}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
     </>

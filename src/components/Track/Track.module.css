@@ -27,6 +27,7 @@
   align-items: center;
   justify-content: center;
   margin-right: 17px;
+  flex-shrink: 0;
 }
 
 .trackTitleSvg {
@@ -81,20 +82,33 @@
 
 .trackTime {
   width: 60px;
+  flex: 0 0 60px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+}
+
+.trackTime button {
+  width: 14px;
+  height: 16px;
+  flex: 0 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .trackTimeSvg {
+  display: block;
   width: 14px;
   height: 12px;
-  margin-right: 17px;
+  margin-right: 0;
   fill: transparent;
   stroke: #696969;
+  flex-shrink: 0;
 }
 
 .trackTimeText {
+  flex-shrink: 0;
   font-style: normal;
   font-weight: 400;
   font-size: 16px;

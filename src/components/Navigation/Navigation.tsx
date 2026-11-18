@@ -1,14 +1,43 @@
-
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import classNames from 'classnames';
+import { useMusicPlayer } from '@/components/MainLayout/MainLayout';
 import styles from './Navigation.module.css';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
+
+  const router = useRouter();
+  const { clearFavorites } = useMusicPlayer();
+
+  useEffect(() => {
+    setIsAuthenticated(Boolean(localStorage.getItem('access')));
+    setIsAuthChecked(true);
+  }, []);
+
+  function handleLogout() {
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('user');
+
+    clearFavorites();
+
+    setIsAuthenticated(false);
+    setIsMenuOpen(false);
+
+    router.push('/auth/signin');
+  }
+
+  function handleLogin() {
+    setIsMenuOpen(false);
+    router.push('/auth/signin');
+  }
 
   return (
     <nav className={styles.mainNav}>
@@ -52,7 +81,7 @@ export default function Navigation() {
 
           <li className={styles.menuItem}>
             <Link
-              href="#"
+              href="/favorites"
               className={styles.menuLink}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -60,15 +89,27 @@ export default function Navigation() {
             </Link>
           </li>
 
-          <li className={styles.menuItem}>
-            <Link
-              href="/auth/signin"
-              className={styles.menuLink}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Войти
-            </Link>
-          </li>
+          {isAuthChecked && (
+            <li className={styles.menuItem}>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  className={styles.menuLink}
+                  onClick={handleLogout}
+                >
+                  Выход
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.menuLink}
+                  onClick={handleLogin}
+                >
+                  Войти
+                </button>
+              )}
+            </li>
+          )}
         </ul>
       </div>
     </nav>

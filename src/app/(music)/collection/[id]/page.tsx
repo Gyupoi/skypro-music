@@ -19,12 +19,20 @@ function CollectionContent() {
   const params = useParams();
   const id = Number(params.id);
 
-  const { currentTrack, isPlaying, setQueue, onTrackSelect } = useMusicPlayer();
+  const {
+    currentTrack,
+    isPlaying,
+    setQueue,
+    onTrackSelect,
+    favoriteTracks,
+    toggleFavorite,
+  } = useMusicPlayer();
 
   const [collection, setCollection] = useState<Collection | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [favoriteError, setFavoriteError] = useState('');
 
   useEffect(() => {
     async function loadCollection() {
@@ -58,6 +66,19 @@ function CollectionContent() {
     loadCollection();
   }, [id, setQueue]);
 
+  async function handleToggleFavorite(track: Track) {
+    try {
+      setFavoriteError('');
+      await toggleFavorite(track);
+    } catch (error) {
+      setFavoriteError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось изменить избранное',
+      );
+    }
+  }
+
   return (
     <>
       <Search />
@@ -67,6 +88,8 @@ function CollectionContent() {
       {isLoading && <p>Загрузка подборки...</p>}
 
       {error && <p role="alert">{error}</p>}
+
+      {favoriteError && <p role="alert">{favoriteError}</p>}
 
       {!isLoading && !error && tracks.length === 0 && (
         <p>В этой подборке пока нет треков</p>
@@ -78,6 +101,8 @@ function CollectionContent() {
           currentTrackId={currentTrack?._id ?? null}
           isPlaying={isPlaying}
           onTrackSelect={onTrackSelect}
+          favoriteTracks={favoriteTracks}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
     </>
