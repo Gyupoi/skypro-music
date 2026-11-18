@@ -1,12 +1,11 @@
 'use client';
 
 import Track from '@/components/Track/Track';
-import { data } from '../../../data';
+import type { Track as TrackData } from '@/api/api';
 import styles from './Playlist.module.css';
 
-type TrackData = (typeof data)[number];
-
 type PlaylistProps = {
+  tracks: TrackData[];
   currentTrackId: number | null;
   isPlaying: boolean;
   onTrackSelect: (track: TrackData) => void;
@@ -20,6 +19,7 @@ function formatDuration(seconds: number): string {
 }
 
 export default function Playlist({
+  tracks,
   currentTrackId,
   isPlaying,
   onTrackSelect,
@@ -45,7 +45,7 @@ export default function Playlist({
       </div>
 
       <div className={styles.contentPlaylist}>
-        {data.map((track) => (
+        {tracks.map((track) => (
           <Track
             key={track._id}
             title={track.name}

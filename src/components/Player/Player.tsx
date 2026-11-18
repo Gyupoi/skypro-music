@@ -1,11 +1,8 @@
-
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import styles from './Player.module.css';
-import { data } from '../../../data';
-
-type TrackData = (typeof data)[number];
+import type { Track as TrackData } from '@/api/api';
 
 type PlayerProps = {
   currentTrack: TrackData | null;
@@ -105,16 +102,12 @@ export default function Player({
         onTimeUpdate={(event) =>
           setCurrentTime(event.currentTarget.currentTime)
         }
-        onLoadedMetadata={(event) =>
-          setDuration(event.currentTarget.duration)
-        }
+        onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
       />
 
       <div className={styles.barContent}>
         <div className={styles.barPlayerProgress}>
-          <span className={styles.currentTime}>
-            {formatTime(currentTime)}
-          </span>
+          <span className={styles.currentTime}>{formatTime(currentTime)}</span>
 
           <input
             className={styles.progressLine}
@@ -131,9 +124,7 @@ export default function Player({
             aria-label="Перемотка трека"
           />
 
-          <span className={styles.duration}>
-            {formatTime(duration)}
-          </span>
+          <span className={styles.duration}>{formatTime(duration)}</span>
         </div>
 
         <div className={styles.barPlayerBlock}>
@@ -233,9 +224,7 @@ export default function Player({
                 className={`${styles.trackPlayLike} ${styles.btnIcon}`}
                 onClick={() => setIsFavorite(!isFavorite)}
                 aria-label={
-                  isFavorite
-                    ? 'Убрать из избранного'
-                    : 'Добавить в избранное'
+                  isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'
                 }
                 disabled={!currentTrack}
               >

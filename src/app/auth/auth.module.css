@@ -1,0 +1,145 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  background: #222;
+  color: #000;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.form {
+  width: 366px;
+  height: 439px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 36px;
+  box-sizing: border-box;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  color: #000;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.logoIcon {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.logoBlue {
+  width: 12px;
+  height: 20px;
+  background: #00b7f1;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.logoGreen {
+  width: 18px;
+  height: 20px;
+  margin-left: -5px;
+  background: #b4e600;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.input {
+  width: 100%;
+  height: 43px;
+  flex-shrink: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  outline: none;
+  background: transparent;
+  color: #222;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.input:focus {
+  border-bottom-color: #580ea2;
+}
+
+.input::placeholder {
+  color: #dedede;
+}
+
+.submit,
+.link {
+  width: 100%;
+  min-height: 47px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.submit {
+  margin-top: 8px;
+  border: 1px solid #580ea2;
+  background: #580ea2;
+  color: #fff;
+}
+
+.submit:hover {
+  background: #7224bd;
+  border-color: #7224bd;
+}
+
+.submit:active {
+  background: #3d0870;
+  border-color: #3d0870;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.link {
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #222;
+}
+
+.link:hover {
+  background: #f3f3f3;
+  border-color: #bbb;
+}
+
+.link:active {
+  background: #e5e5e5;
+}
+
+.message {
+  margin: 0;
+  color: #e04444;
+  font-size: 12px;
+  text-align: center;
+}
