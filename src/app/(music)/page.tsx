@@ -8,6 +8,12 @@ import Playlist from '@/components/Playlist/Playlist';
 import { useMusicPlayer } from '@/components/MainLayout/MainLayout';
 
 import { getTracks, type Track } from '@/api/api';
+import {
+  searchTracks,
+  filterTracks,
+  sortTracks,
+  type SortOrder,
+} from '@/utils/trackUtils';
 
 function HomeContent() {
   const {
@@ -20,6 +26,10 @@ function HomeContent() {
   } = useMusicPlayer();
 
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('default');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [favoriteError, setFavoriteError] = useState('');
@@ -59,13 +69,47 @@ function HomeContent() {
     }
   }
 
+  function handleToggleAuthor(author: string) {
+    setSelectedAuthors((current) =>
+      current.includes(author)
+        ? current.filter((item) => item !== author)
+        : [...current, author],
+    );
+  }
+
+  function handleToggleGenre(genre: string) {
+    setSelectedGenres((current) =>
+      current.includes(genre)
+        ? current.filter((item) => item !== genre)
+        : [...current, genre],
+    );
+  }
+
+  const searchedTracks = searchTracks(tracks, searchQuery);
+
+  const filteredTracks = filterTracks(
+    searchedTracks,
+    selectedAuthors,
+    selectedGenres,
+  );
+
+  const displayedTracks = sortTracks(filteredTracks, sortOrder);
+
   return (
     <>
-      <Search />
+      <Search value={searchQuery} onChange={setSearchQuery} />
 
       <h2 className="centerblock__h2">Треки</h2>
 
-      <Filters tracks={tracks} />
+      <Filters
+        tracks={tracks}
+        selectedAuthors={selectedAuthors}
+        selectedGenres={selectedGenres}
+        sortOrder={sortOrder}
+        onToggleAuthor={handleToggleAuthor}
+        onToggleGenre={handleToggleGenre}
+        onSortChange={setSortOrder}
+      />
 
       {isLoading && <p>Загрузка треков...</p>}
 
@@ -73,11 +117,13 @@ function HomeContent() {
 
       {favoriteError && <p role="alert">{favoriteError}</p>}
 
-      {!isLoading && !error && tracks.length === 0 && <p>Треки не найдены</p>}
+      {!isLoading && !error && displayedTracks.length === 0 && (
+        <p>Нет подходящих треков</p>
+      )}
 
-      {!isLoading && !error && tracks.length > 0 && (
+      {!isLoading && !error && displayedTracks.length > 0 && (
         <Playlist
-          tracks={tracks}
+          tracks={displayedTracks}
           currentTrackId={currentTrack?._id ?? null}
           isPlaying={isPlaying}
           onTrackSelect={onTrackSelect}
