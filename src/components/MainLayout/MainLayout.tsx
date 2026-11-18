@@ -12,7 +12,13 @@ import {
 import Navigation from '@/components/Navigation/Navigation';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Player from '@/components/Player/Player';
-import type { Track } from '@/api/api';
+
+import {
+  getFavoriteTracks,
+  addTrackToFavorite,
+  removeTrackFromFavorite,
+  type Track,
+} from '@/api/api';
 
 import '../../app/page.css';
 
@@ -20,8 +26,11 @@ type MusicPlayerContextType = {
   currentTrack: Track | null;
   isPlaying: boolean;
   isShuffle: boolean;
+  favoriteTracks: Track[];
   setQueue: (tracks: Track[]) => void;
   onTrackSelect: (track: Track) => void;
+  toggleFavorite: (track: Track) => Promise<void>;
+  clearFavorites: () => void;
 };
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | null>(null);
@@ -61,16 +70,33 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
 
-  useEffect(() => {
-    const accessToken = localStorage.getItem('access');
+  const [favoriteTracks, setFavoriteTracks] = useState<Track[]>([]);
 
-    if (!accessToken) {
-      window.location.replace('/auth/signin');
-      return;
+  const clearFavorites = useCallback(() => {
+    setFavoriteTracks([]);
+  }, []);
+
+  useEffect(() => {
+    async function checkAuth() {
+      const accessToken = localStorage.getItem('access');
+
+      if (!accessToken) {
+        window.location.replace('/auth/signin');
+        return;
+      }
+
+      try {
+        const favorites = await getFavoriteTracks();
+        setFavoriteTracks(favorites);
+      } catch (error) {
+        console.error('Не удалось загрузить избранное:', error);
+      } finally {
+        setIsAuthorized(true);
+        setIsCheckingAuth(false);
+      }
     }
 
-    setIsAuthorized(true);
-    setIsCheckingAuth(false);
+    checkAuth();
   }, []);
 
   const setQueue = useCallback((tracks: Track[]) => {
@@ -78,6 +104,27 @@ export default function MainLayout({ children }: MainLayoutProps) {
     setPlaybackOrder(tracks);
     setIsShuffle(false);
   }, []);
+
+  const toggleFavorite = useCallback(
+    async (track: Track) => {
+      const isFavorite = favoriteTracks.some(
+        (favoriteTrack) => favoriteTrack._id === track._id,
+      );
+
+      if (isFavorite) {
+        await removeTrackFromFavorite(track._id);
+
+        setFavoriteTracks((previous) =>
+          previous.filter((item) => item._id !== track._id),
+        );
+      } else {
+        await addTrackToFavorite(track._id);
+
+        setFavoriteTracks((previous) => [...previous, track]);
+      }
+    },
+    [favoriteTracks],
+  );
 
   const handleNextTrack = useCallback(() => {
     if (!currentTrack) return;
@@ -126,14 +173,21 @@ export default function MainLayout({ children }: MainLayoutProps) {
     return <p>Проверка авторизации...</p>;
   }
 
+  const currentTrackIsFavorite = currentTrack
+    ? favoriteTracks.some((track) => track._id === currentTrack._id)
+    : false;
+
   return (
     <MusicPlayerContext.Provider
       value={{
         currentTrack,
         isPlaying,
         isShuffle,
+        favoriteTracks,
         setQueue,
         onTrackSelect: setCurrentTrack,
+        toggleFavorite,
+        clearFavorites,
       }}
     >
       <div className="wrapper">
@@ -154,6 +208,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
             onPrevTrack={handlePrevTrack}
             isShuffle={isShuffle}
             onShuffleChange={handleShuffle}
+            isFavorite={currentTrackIsFavorite}
+            onToggleFavorite={() => {
+              if (currentTrack) {
+                void toggleFavorite(currentTrack);
+              }
+            }}
           />
 
           <footer className="footer"></footer>

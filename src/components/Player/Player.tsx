@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -12,6 +13,8 @@ type PlayerProps = {
   onPrevTrack: () => void;
   isShuffle: boolean;
   onShuffleChange: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 };
 
 function formatTime(time: number) {
@@ -31,9 +34,10 @@ export default function Player({
   onPrevTrack,
   isShuffle,
   onShuffleChange,
+  isFavorite,
+  onToggleFavorite,
 }: PlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -222,10 +226,11 @@ export default function Player({
               <button
                 type="button"
                 className={`${styles.trackPlayLike} ${styles.btnIcon}`}
-                onClick={() => setIsFavorite(!isFavorite)}
+                onClick={onToggleFavorite}
                 aria-label={
                   isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'
                 }
+                aria-pressed={isFavorite}
                 disabled={!currentTrack}
               >
                 <svg

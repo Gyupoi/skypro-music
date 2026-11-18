@@ -50,17 +50,83 @@ export type Tokens = {
   refresh: string;
 };
 
+// Обновление access-токена
+export async function refreshToken(
+  refresh: string,
+): Promise<{ access: string }> {
+  return request('/user/token/refresh/', {
+    method: 'POST',
+    body: JSON.stringify({ refresh }),
+  });
+}
+
+// Повтор авторизованного запроса при ошибке 401
+async function withReAuth(
+  makeRequest: (accessToken: string) => Promise<Response>,
+): Promise<Response> {
+  const access = localStorage.getItem('access');
+
+  if (!access) {
+    throw new Error('Пользователь не авторизован');
+  }
+
+  let response = await makeRequest(access);
+
+  if (response.status !== 401) {
+    return response;
+  }
+
+  const refresh = localStorage.getItem('refresh');
+
+  if (!refresh) {
+    throw new Error('Отсутствует refresh-токен');
+  }
+
+  try {
+    const tokens = await refreshToken(refresh);
+
+    localStorage.setItem('access', tokens.access);
+
+    response = await makeRequest(tokens.access);
+
+    if (response.status === 401) {
+      throw new Error('Не удалось выполнить авторизованный запрос');
+    }
+
+    return response;
+  } catch (error) {
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('user');
+
+    throw error;
+  }
+}
+
+// Основная функция запросов
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
+  withAuth = false,
 ): Promise<T> {
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
+  const makeRequest = (accessToken?: string) => {
+    const headers = new Headers(options.headers);
+
+    headers.set('Content-Type', 'application/json');
+
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`);
+    }
+
+    return fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+  };
+
+  const response = withAuth
+    ? await withReAuth(makeRequest)
+    : await makeRequest();
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
@@ -115,17 +181,18 @@ export function getTokens(email: string, password: string): Promise<Tokens> {
   });
 }
 
-// Обновление access-токена
-export function refreshToken(refresh: string): Promise<{ access: string }> {
-  return request('/user/token/refresh/', {
-    method: 'POST',
-    body: JSON.stringify({ refresh }),
-  });
-}
-
 // Получение всех подборок
 export async function getCollections(): Promise<Collection[]> {
   const response = await request<CollectionsResponse>('/catalog/selection/all');
+
+  return response.data;
+}
+
+// Получение одной подборки
+export async function getCollection(id: number): Promise<Collection> {
+  const response = await request<CollectionResponse>(
+    `/catalog/selection/${id}/`,
+  );
 
   return response.data;
 }
@@ -140,11 +207,23 @@ export async function getCollectionTracks(id: number): Promise<Track[]> {
     .filter((track): track is Track => track !== undefined);
 }
 
-// Получение одной подборки
-export async function getCollection(id: number): Promise<Collection> {
-  const response = await request<CollectionResponse>(
-    `/catalog/selection/${id}/`,
+// Получение избранных треков
+export async function getFavoriteTracks(): Promise<Track[]> {
+  const response = await request<TracksResponse>(
+    '/catalog/track/favorite/all/',
+    {},
+    true,
   );
 
   return response.data;
+}
+
+// Добавление трека в избранное
+export function addTrackToFavorite(id: number): Promise<unknown> {
+  return request(`/catalog/track/${id}/favorite/`, { method: 'POST' }, true);
+}
+
+// Удаление трека из избранного
+export function removeTrackFromFavorite(id: number): Promise<unknown> {
+  return request(`/catalog/track/${id}/favorite/`, { method: 'DELETE' }, true);
 }

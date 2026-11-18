@@ -23,8 +23,14 @@
   overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding-bottom: 78px;
   box-sizing: border-box;
+}
+
+.contentPlaylist::-webkit-scrollbar {
+  display: none;
 }
 
 .playlistTitleCol {
