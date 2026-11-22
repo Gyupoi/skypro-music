@@ -15,6 +15,8 @@ import {
   type Collection,
 } from '@/api/api';
 
+import { searchTracks } from '@/utils/trackUtils';
+
 function CollectionContent() {
   const params = useParams();
   const id = Number(params.id);
@@ -30,6 +32,7 @@ function CollectionContent() {
 
   const [collection, setCollection] = useState<Collection | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [favoriteError, setFavoriteError] = useState('');
@@ -79,9 +82,11 @@ function CollectionContent() {
     }
   }
 
+  const displayedTracks = searchTracks(tracks, searchQuery);
+
   return (
     <>
-      <Search />
+      <Search value={searchQuery} onChange={setSearchQuery} />
 
       <h2 className="centerblock__h2">{collection?.name || 'Подборка'}</h2>
 
@@ -91,13 +96,15 @@ function CollectionContent() {
 
       {favoriteError && <p role="alert">{favoriteError}</p>}
 
-      {!isLoading && !error && tracks.length === 0 && (
-        <p>В этой подборке пока нет треков</p>
+      {!isLoading && !error && displayedTracks.length === 0 && (
+        <p>
+          {searchQuery ? 'Треки не найдены' : 'В этой подборке пока нет треков'}
+        </p>
       )}
 
-      {!isLoading && !error && tracks.length > 0 && (
+      {!isLoading && !error && displayedTracks.length > 0 && (
         <Playlist
-          tracks={tracks}
+          tracks={displayedTracks}
           currentTrackId={currentTrack?._id ?? null}
           isPlaying={isPlaying}
           onTrackSelect={onTrackSelect}

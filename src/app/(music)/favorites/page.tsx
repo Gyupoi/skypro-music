@@ -8,6 +8,8 @@ import Search from '@/components/Search/Search';
 import Playlist from '@/components/Playlist/Playlist';
 import type { Track } from '@/api/api';
 
+import { searchTracks } from '@/utils/trackUtils';
+
 export default function FavoritesPage() {
   const router = useRouter();
 
@@ -19,6 +21,7 @@ export default function FavoritesPage() {
     toggleFavorite,
   } = useMusicPlayer();
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [favoriteError, setFavoriteError] = useState('');
 
@@ -50,19 +53,23 @@ export default function FavoritesPage() {
     return <p>Проверка авторизации...</p>;
   }
 
+  const displayedTracks = searchTracks(favoriteTracks, searchQuery);
+
   return (
     <>
-      <Search />
+      <Search value={searchQuery} onChange={setSearchQuery} />
 
       <h2 className="centerblock__h2">Мой плейлист</h2>
 
       {favoriteError && <p role="alert">{favoriteError}</p>}
 
-      {favoriteTracks.length === 0 ? (
-        <p>В избранном пока нет треков</p>
+      {displayedTracks.length === 0 ? (
+        <p>
+          {searchQuery ? 'Треки не найдены' : 'В избранном пока нет треков'}
+        </p>
       ) : (
         <Playlist
-          tracks={favoriteTracks}
+          tracks={displayedTracks}
           currentTrackId={currentTrack?._id ?? null}
           isPlaying={isPlaying}
           onTrackSelect={onTrackSelect}

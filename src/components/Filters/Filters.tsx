@@ -1,18 +1,32 @@
-
 'use client';
 
 import { useState } from 'react';
 import classNames from 'classnames';
 import type { Track } from '@/api/api';
+import type { SortOrder } from '@/utils/trackUtils';
 import styles from './Filters.module.css';
 
 type FilterName = 'author' | 'year' | 'genre';
 
 type FiltersProps = {
   tracks: Track[];
+  selectedAuthors: string[];
+  selectedGenres: string[];
+  sortOrder: SortOrder;
+  onToggleAuthor: (author: string) => void;
+  onToggleGenre: (genre: string) => void;
+  onSortChange: (order: SortOrder) => void;
 };
 
-export default function Filters({ tracks }: FiltersProps) {
+export default function Filters({
+  tracks,
+  selectedAuthors,
+  selectedGenres,
+  sortOrder,
+  onToggleAuthor,
+  onToggleGenre,
+  onSortChange,
+}: FiltersProps) {
   const [activeFilter, setActiveFilter] = useState<FilterName | null>(null);
 
   const authors = [...new Set(tracks.map((track) => track.author))].sort();
@@ -42,14 +56,52 @@ export default function Filters({ tracks }: FiltersProps) {
     key: FilterName;
     label: string;
     items: string[];
+    selectedCount: number;
   }[] = [
-    { key: 'author', label: 'исполнителю', items: authors },
-    { key: 'year', label: 'году выпуска', items: years },
-    { key: 'genre', label: 'жанру', items: genres },
+    {
+      key: 'author',
+      label: 'исполнителю',
+      items: authors,
+      selectedCount: selectedAuthors.length,
+    },
+    {
+      key: 'year',
+      label: 'году выпуска',
+      items: years,
+      selectedCount: sortOrder === 'default' ? 0 : 1,
+    },
+    {
+      key: 'genre',
+      label: 'жанру',
+      items: genres,
+      selectedCount: selectedGenres.length,
+    },
   ];
 
   function handleFilterClick(name: FilterName) {
     setActiveFilter((current) => (current === name ? null : name));
+  }
+
+  function handleItemClick(filter: FilterName, item: string) {
+    if (filter === 'author') {
+      onToggleAuthor(item);
+    }
+
+    if (filter === 'genre') {
+      onToggleGenre(item);
+    }
+  }
+
+  function isSelected(filter: FilterName, item: string) {
+    if (filter === 'author') {
+      return selectedAuthors.includes(item);
+    }
+
+    if (filter === 'genre') {
+      return selectedGenres.includes(item);
+    }
+
+    return false;
   }
 
   return (
@@ -61,28 +113,66 @@ export default function Filters({ tracks }: FiltersProps) {
           <button
             type="button"
             className={classNames(styles.filterButton, {
-              [styles.active]: activeFilter === filter.key,
+              [styles.active]:
+                activeFilter === filter.key || filter.selectedCount > 0,
             })}
             onClick={() => handleFilterClick(filter.key)}
             aria-expanded={activeFilter === filter.key}
           >
             {filter.label}
+            {filter.selectedCount > 0 && ` (${filter.selectedCount})`}
           </button>
 
           {activeFilter === filter.key && (
             <div className={styles.filterList}>
-              {filter.items.map((item) => (
-                <button
-                  type="button"
-                  className={styles.filterItem}
-                  key={item}
-                  onClick={() => {
-                    // Фильтрацию пока не реализуем.
-                  }}
-                >
-                  {item}
-                </button>
-              ))}
+              <div className={styles.filterListScroll}>
+                {filter.key === 'year' ? (
+                  <>
+                    <button
+                      type="button"
+                      className={classNames(styles.filterItem, {
+                        [styles.selected]: sortOrder === 'default',
+                      })}
+                      onClick={() => onSortChange('default')}
+                    >
+                      По умолчанию
+                    </button>
+
+                    <button
+                      type="button"
+                      className={classNames(styles.filterItem, {
+                        [styles.selected]: sortOrder === 'oldest',
+                      })}
+                      onClick={() => onSortChange('oldest')}
+                    >
+                      Сначала старые
+                    </button>
+
+                    <button
+                      type="button"
+                      className={classNames(styles.filterItem, {
+                        [styles.selected]: sortOrder === 'newest',
+                      })}
+                      onClick={() => onSortChange('newest')}
+                    >
+                      Сначала новые
+                    </button>
+                  </>
+                ) : (
+                  filter.items.map((item) => (
+                    <button
+                      type="button"
+                      className={classNames(styles.filterItem, {
+                        [styles.selected]: isSelected(filter.key, item),
+                      })}
+                      key={item}
+                      onClick={() => handleItemClick(filter.key, item)}
+                    >
+                      {item}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
           )}
         </div>
